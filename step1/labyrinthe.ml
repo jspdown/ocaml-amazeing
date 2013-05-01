@@ -2,26 +2,29 @@ module Case : sig
   type state = Close | Open
   type case
 
-  val length	 : case -> int
-  val get	 : case -> int -> case
-  val get_open	 : case -> int -> case
-  val get_close	 : case -> int -> case
+  val length	  : case -> int
+  val get	  : case -> int -> case
+  val get_open	  : case -> int -> case
+  val get_close	  : case -> int -> case
 
-  val set	 : case -> int -> case -> state -> unit
-  val equal	 : case -> case -> bool
-  val inter	 : case -> case -> bool
-  val inter_idx	 : case -> case -> int
-  val open_door  : case -> int -> unit
-  val close_door : case -> int -> unit
-  val create	 : int -> case
+  val set	  : case -> int  -> case -> state -> unit
+  val equal	  : case -> case -> bool
+  val inter	  : case -> case -> bool
+  val inter_idx	  : case -> case -> int
+  val inter_state : case -> case -> state
+  val open_door   : case -> int  -> unit
+  val close_door  : case -> int  -> unit
+  val create	  : int -> case
 
-  val nb_open	 : case -> int
-  val nb_close	 : case -> int
-  val print_case : case -> unit
+  val nb_open	  : case -> int
+  val nb_close	  : case -> int
+  val print_case  : case -> unit
 
-  val change_state_door : state -> case -> int -> unit
-  val get_idx_open	 : case -> int -> int
-  val get_idx_close	 : case -> int -> int
+  val change_state_door  : state -> case -> int -> unit
+  val get_idx_open	 : case  -> int  -> int
+  val get_idx_close	 : case  -> int  -> int
+
+  val get_list_state	 : case -> state list
 
   exception Invalid_case
   exception Not_connect_case
@@ -59,12 +62,19 @@ end = struct
       | (c, status) ->
   	if status = state
   	then
-	  begin
-	    c;
-  	    f (i, !c)
-	  end
+  	  f (i, !c)
   	else
   	  get_state f state case (i + 1)
+
+  let get_list_state case =
+    let rec get_list_state_rec case i l =
+      if i > length case
+      then
+	l
+      else
+	get_list_state_rec case (i + 1) ((snd (get_idx case i))::l)
+    in
+    get_list_state_rec case 0 []
 
   let get_idx_open = get_state fst Open
   let get_open = get_state snd Open
@@ -96,6 +106,8 @@ end = struct
     inter_rec case1 case2 0
 
   let inter case1 case2 = (inter_idx case1 case2) >= 0
+
+  let inter_state case1 case2 = snd (get_idx case1 (inter_idx case1 case2))
 
   let change_one_side_state state case i = match case with
     | None -> raise Invalid_case
@@ -162,11 +174,16 @@ end = struct
   let print_case a = match a with
     | Case(t) -> Array.iteri print_one_case !t
     | None    -> ()
+
 end
 
 (* Labyrinthe module *)
 
-type labyrinthe = Case.case array
+type labyrinthe = (Case.case array * int * int)
+
+type node =
+| Node of (int * int * int)
+| Empty
 
 let check tab =
   let rec check_rec tab a i =
@@ -251,17 +268,32 @@ let create height width size =
     Random.self_init ();
     link_tab tab;
     create_lab tab;
-    tab;
+    (tab, height, width);
   end
 
-let get_case lab x y =
+(* let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) = *)
+(*   let case_dep = get_case lab x_start y_start in *)
+(*   let rec create_grap (x_prev,y_prev) (x,y) weight = *)
+(*     if x < 0 || y < 0 || x > height || y > width *)
+(*     then *)
+(*       (Empty, []) *)
+(*     else *)
+(*       (Node(x,y,weight), *)
+(*        (create_grap (x,y) (x+1,y) (weight + 1)) *)
+(*        ::(create_grap (x,y) (x-1,y) (weight + 1)) *)
+(*        ::(create_grap (x,y) (x,y+1) (weight + 1)) *)
+(*        ::(create_grap (x,y) (x,y-1) (weight + 1))::[]) *)
+(*   in *)
+(*   create_grap (x_fin,y_fin) (x_fin,y_fin) 0 *)
+
+let get_case (lab,height,width) x y =
   if (x * y) < (Array.length lab)
   then
     Array.get lab (x * y)
   else
     raise (Invalid_argument "index out of range")
 
-let print_lab height width tab =
+let print_lab (tab,height,width) =
   let print_one_case i case =
     begin
       begin
