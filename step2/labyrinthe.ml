@@ -68,7 +68,7 @@ end = struct
 
   let get_list_state case =
     let rec get_list_state_rec case i l =
-      if i > (length case) -1
+      if i > (length case) - 1
       then
 	l
       else
@@ -185,6 +185,13 @@ type node =
 | Node of (int * int * int)
 | Empty
 
+let compare_weight (a,_) (b,_) =
+  match a,b with
+  | (-1),(-1) -> 0
+  | (-1),_    -> (1)
+  | _, (-1)   -> -1
+  | a, b      -> compare a b
+
 let check tab =
   let rec check_rec tab a i =
     if (Array.length tab) <= i
@@ -271,27 +278,70 @@ let create height width size =
     (tab, height, width);
   end
 
-(* let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) = *)
-(*   let case_dep = get_case lab x_start y_start in *)
-(*   let rec create_grap (x_prev,y_prev) (x,y) weight = *)
-(*     if x < 0 || y < 0 || x > height || y > width *)
-(*     then *)
-(*       (Empty, []) *)
-(*     else *)
-(*       (Node(x,y,weight), *)
-(*        (create_grap (x,y) (x+1,y) (weight + 1)) *)
-(*        ::(create_grap (x,y) (x-1,y) (weight + 1)) *)
-(*        ::(create_grap (x,y) (x,y+1) (weight + 1)) *)
-(*        ::(create_grap (x,y) (x,y-1) (weight + 1))::[]) *)
-(*   in *)
-(*   create_grap (x_fin,y_fin) (x_fin,y_fin) 0 *)
-
 let get_case (lab,height,width) x y =
-  if (x * y) < (Array.length lab)
+  if x < height && y < width
   then
-    Array.get lab (x * y)
+    Array.get lab ((x * width) + y)
   else
     raise (Invalid_argument "index out of range")
+let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) =
+  let weight_map = (Array.make_matrix height width (-1)) in
+  let set_weight case (x,y) weight =
+    if x < height && y < width &&
+      ((weight_map.(x).(y)) > weight || (weight_map.(x).(y)) < 0)
+    then
+      try
+	if (Case.inter_state (get_case (lab,height,width) x y) case) = Case.Open
+	then
+	  begin
+	    weight_map.(x).(y) <- weight;
+	    weight;
+	  end
+	else
+	  -1
+      with x -> -1
+    else
+      -1
+  in
+  let rec find_path (x,y) weight =
+    let _ = solve (x,y) (x+1,y) (weight + 1) in
+    let _ = solve (x,y) (x-1,y) (weight + 1) in
+    let _ = solve (x,y) (x,y+1) (weight + 1) in
+    solve (x,y) (x,y-1) (weight + 1);
+  and
+      solve (x_prev,y_prev) (x,y) weight =
+    try
+      if x >= height || y >= width || (set_weight (get_case (lab,height,width) x_prev y_prev) (x,y) weight) < 0
+      then
+	weight
+      else
+	find_path (x,y) weight
+    with x -> weight
+  in
+  let get_weight (x_prev,y_prev) (x,y) =
+    if (x >= height || y >= width || x < 0 || y < 0)
+    then
+      (-1,(x,y))
+    else
+      if (Case.inter_state (get_case (lab,height,width) x y) (get_case (lab,height,width) x_prev y_prev)) = Case.Open
+      then
+	(weight_map.(x).(y),(x,y))
+      else
+	(-1,(x,y))
+  in
+  let get_best_pos (x,y) =
+    snd (List.hd (List.sort compare_weight (get_weight (x,y) (x+1,y)::get_weight (x,y) (x-1,y)::get_weight (x,y) (x,y+1)::get_weight (x,y) (x,y-1)::[])))
+  in
+  let rec resolve (x,y) acc =
+    if x = x_fin && y = y_fin
+    then
+      (y,x)::acc
+    else
+      resolve (get_best_pos (x,y)) ((y,x)::acc)
+  in
+  let _ = weight_map.(x_fin).(y_fin) <- 0 in
+  let _ = find_path (x_fin,y_fin) 0 in
+  List.rev (resolve (x_start,y_start) [])
 
 let print_lab (tab,height,width) =
   let print_one_case i case =
@@ -302,7 +352,7 @@ let print_lab (tab,height,width) =
 	  then
 	    print_string " "
 	  else
-	    print_string "_";
+	    print_string "_"
 	with x -> print_string "_";
       end;
       begin

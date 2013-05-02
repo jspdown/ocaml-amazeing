@@ -32,6 +32,6 @@ end
 type labyrinthe
 
 val create : int -> int -> int -> labyrinthe
-(*val print_lab :int -> int -> labyrinthe -> unit*)
+val print_lab : labyrinthe -> unit
 
 val get_case : labyrinthe -> int -> int -> Case.case
