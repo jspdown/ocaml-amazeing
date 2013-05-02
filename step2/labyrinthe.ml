@@ -68,7 +68,7 @@ end = struct
 
   let get_list_state case =
     let rec get_list_state_rec case i l =
-      if i > length case
+      if i > (length case) -1
       then
 	l
       else
