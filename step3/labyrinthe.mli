@@ -22,6 +22,7 @@ module Case : sig
   val change_state_door : state -> case -> int -> unit
   val get_idx_open	 : case -> int -> int
   val get_idx_close	 : case -> int -> int
+  val get_list_state	 : case -> state list
 
   exception Invalid_case
   exception Not_connect_case
@@ -31,6 +32,6 @@ end
 type labyrinthe
 
 val create : int -> int -> int -> labyrinthe
-val print_lab :int -> int -> labyrinthe -> unit
-
+val print_lab : labyrinthe -> unit
+val solve : labyrinthe -> int * int -> int * int -> (int * int) list
 val get_case : labyrinthe -> int -> int -> Case.case

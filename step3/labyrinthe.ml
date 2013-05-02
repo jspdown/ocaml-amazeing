@@ -68,7 +68,7 @@ end = struct
 
   let get_list_state case =
     let rec get_list_state_rec case i l =
-      if i > length case
+      if i > (length case) - 1
       then
 	l
       else
@@ -139,6 +139,7 @@ end = struct
 	i
       else
 	match (get_idx case acc) with
+	| ({contents = None}, state) -> nb_state case state i (acc + 1)
 	| (_, status) ->
 	  if status = state
 	  then
@@ -278,7 +279,7 @@ let create height width size =
   end
 
 let get_case (lab,height,width) x y =
-  if ((x * width) + y) < (Array.length lab)
+  if x < height && y < width
   then
     Array.get lab ((x * width) + y)
   else
