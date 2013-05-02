@@ -1,9 +1,10 @@
 
 RESULT     = step2
 
-SOURCES    = 	init.ml
+SOURCES    = 	labyrinthe.ml \
+		init.ml
 
-LIBS       = bigarray sdl
+LIBS       = bigarray sdl sdlloader
 
 INCDIRS    = +sdl
 
