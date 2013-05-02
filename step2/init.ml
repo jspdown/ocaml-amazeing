@@ -64,9 +64,9 @@ let	render sx sy =
   let screen = Sdlvideo.set_video_mode (sx * tile_size) (sy * tile_size) [] in
   let texture =  Sdlloader.load_image "tiles4.png" in
   let rec loop_in x y =
-    if x = 10
+    if x = sx
     then 
-      if y = 9
+      if y = sy - 1
       then map
       else loop_in 0 (y + 1)
     else
@@ -80,7 +80,7 @@ let	render sx sy =
   
 let	main () =
   Sdl.init [`VIDEO];
-  print_lab (render 10 10);
+  print_lab (render 4 4);
   print_endline "plop";
   Sdlvideo.flip (Sdlvideo.get_video_surface ());
   Sdltimer.delay 8000;
