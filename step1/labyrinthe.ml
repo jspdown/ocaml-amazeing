@@ -139,7 +139,6 @@ end = struct
 	i
       else
 	match (get_idx case acc) with
-	| ({contents = None}, state) -> nb_state case state i (acc + 1)
 	| (_, status) ->
 	  if status = state
 	  then
