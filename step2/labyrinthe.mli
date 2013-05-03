@@ -33,5 +33,5 @@ type labyrinthe
 
 val create : int -> int -> int -> labyrinthe
 val print_lab : labyrinthe -> unit
-
+val solve : labyrinthe -> int * int -> int * int -> (int * int) list
 val get_case : labyrinthe -> int -> int -> Case.case
