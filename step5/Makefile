@@ -1,6 +1,7 @@
 OCAMLMAKEFILE = ./OCamlMakefile
 
-SOURCES = init.ml
+SOURCES = 	labyrinthe.ml \
+		init.ml
 RESULT  = step5
 
 INCDIRS=+sdl 
