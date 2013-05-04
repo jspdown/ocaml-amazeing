@@ -107,16 +107,6 @@ let render sx sy screen =
       loop_in (x + 1) y
   in loop_in 0 0
 
-(*let move_up x y l h map screen to_solve =
-  if y > 0 && check_collision 0 (get_case map x y) == 0
-  then
-    let y2 = decrement y in
-    put_map_back x y screen map;
-    move x y2 screen;
-    wait_for_escape x y2 screen l h map to_solve
-  else
-    wait_for_escape x y screen l h map to_solve
-*)
 let	rec wait_for_escape x y screen l h map to_solve =
   match wait_event () with
     | KEYDOWN {keysym=KEY_ESCAPE} ->
@@ -181,11 +171,6 @@ let	rec wait_for_escape x y screen l h map to_solve =
 	end
       else
 	();
-      if (Sdltimer.get_ticks ()) mod 7000 < 100 && (Sdltimer.get_ticks ()) > 6999
-      then
-	  wait_for_escape x y screen l h (render l h screen) to_solve
-      else
-	();
       move x y screen;
       print_objective 9 9 screen; (*TODO*)
       if x = 9 && y = 9 (*TODO*)
@@ -212,10 +197,6 @@ let	main () =
   Sdl.init [`VIDEO; `AUDIO; `TIMER];
   at_exit Sdl.quit;
   Sdlmixer.open_audio ();
-  (*at_exit Sdlmixer.fadeout_music 2.0;
-  at_exit Sdltimer.delay 1000;
-  at_exit Sdlmixer.halt_music ();
-  at_exit Sdlmixer.free_music music;*)
   at_exit Sdlmixer.close_audio;
   run 10 10 (*TODO*)
 
