@@ -80,7 +80,7 @@ let render_clear sx sy screen map =
     if x = sx
     then
       if y = sy - 1
-      then map
+      then ()
       else loop_in_clear 0 (y + 1)
     else
       let new_pos = Sdlvideo.rect (x * tile_size) (y * tile_size) 0 0 in

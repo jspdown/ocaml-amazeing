@@ -5,7 +5,7 @@ SOURCES = 	labyrinthe.ml \
 RESULT  = step5
 
 INCDIRS=+sdl
-LIBS=bigarray sdl sdlloader sdlmixer ##sdltimer
+LIBS=bigarray sdl sdlloader sdlmixer
 
 TRASH=*~
 
