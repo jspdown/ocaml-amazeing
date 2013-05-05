@@ -66,7 +66,7 @@ let     render_solve screen map start finish =
   let rec process_solve screen l =
     match l with
       | []        -> map
-      | h::t      -> 
+      | h::t      ->
 	let blt_pos = Sdlvideo.rect (snd h * tile_size) (fst h * tile_size) 0 0 in
 	let rect_pos = Sdlvideo.rect (0) (0) tile_size tile_size in
 	begin
@@ -97,7 +97,7 @@ let render sx sy screen =
     then
       if y = sy - 1
       then map
-      else 
+      else
 	loop_in 0 (y + 1)
     else
       let new_pos = Sdlvideo.rect (x * tile_size) (y * tile_size) 0 0 in
@@ -166,14 +166,14 @@ let	rec wait_for_escape x y screen l h map to_solve =
       then
 	begin
 	  render_clear l h screen map;
-	  render_solve screen map (x,y) (9,9); (*TODO*)
+	  render_solve screen map (x,y) (l-1,h-1); (* TO DO *)
 	  Sdlvideo.flip screen
 	end
       else
 	();
       move x y screen;
-      print_objective 9 9 screen; (*TODO*)
-      if x = 9 && y = 9 (*TODO*)
+      print_objective (l-1) (h-1) screen; (*TODO*)
+      if x = (l-1) && y = (h-1) (*TODO*)
       then
 	print_endline "Game Over! Well played!"
       else
@@ -193,11 +193,9 @@ let	run x y =
     Sdlvideo.flip screen;
   end
 
-let	main () =
+let	main height width =
   Sdl.init [`VIDEO; `AUDIO; `TIMER];
   at_exit Sdl.quit;
   Sdlmixer.open_audio ();
   at_exit Sdlmixer.close_audio;
-  run 10 10 (*TODO*)
-
-let _ = main ()
+  run height width

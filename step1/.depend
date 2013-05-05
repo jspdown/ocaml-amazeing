@@ -1,0 +1,5 @@
+labyrinthe.cmo : labyrinthe.cmi
+labyrinthe.cmx : labyrinthe.cmi
+main.cmo : labyrinthe.cmi
+main.cmx : labyrinthe.cmx
+labyrinthe.cmi :

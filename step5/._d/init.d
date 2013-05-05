@@ -1,2 +1,2 @@
-init.cmo: labyrinthe.cmo
-init.cmx: labyrinthe.cmx
+init.cmo : labyrinthe.cmo
+init.cmx : labyrinthe.cmx

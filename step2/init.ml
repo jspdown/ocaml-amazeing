@@ -1,8 +1,10 @@
+open Sdlevent
+open Sdlkey
 open Labyrinthe
 
 let	tile_size = 50
 
-let get_pos case = 
+let get_pos case =
   match Case.get_list_state case with
   | [Case.Close; Case.Open; Case.Open; Case.Open]	-> (0, 50)
   | [Case.Open; Case.Open; Case.Open; Case.Close]	-> (50, 50)
@@ -27,7 +29,7 @@ let render sx sy =
   let texture =  Sdlloader.load_image "t.png" in
   let rec loop_in x y =
     if x = sx
-    then 
+    then
       if y = sy - 1
       then map
       else loop_in 0 (y + 1)
@@ -38,15 +40,18 @@ let render sx sy =
       Sdlvideo.blit_surface ~dst:screen ~dst_rect:new_pos ~src:texture ~src_rect:rect_pos ();
       loop_in (x + 1) y
   in loop_in 0 0
-  
-let	main () =
+
+let rec main_loop () =
+  match wait_event () with
+  | KEYDOWN {keysym=KEY_ESCAPE} ->
+    print_endline "Goodbye! See you next time."
+  | QUIT ->
+    print_endline "Goodbye! See you next time."
+  | _    -> main_loop ()
+
+let	main height width =
   Sdl.init [`VIDEO];
-  print_lab (render 20 20);
-  print_endline "plop";
+  render height width;
   Sdlvideo.flip (Sdlvideo.get_video_surface ());
-  Sdltimer.delay 8000;
+  main_loop ();
   Sdl.quit ()
-
-  
-let _ = main ()
-

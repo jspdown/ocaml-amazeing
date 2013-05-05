@@ -19,7 +19,7 @@ module Case : sig
   val nb_close	 : case -> int
   val print_case : case -> unit
 
-  val change_state_door  : state -> case -> int -> unit
+  val change_state_door : state -> case -> int -> unit
   val get_idx_open	 : case -> int -> int
   val get_idx_close	 : case -> int -> int
   val get_list_state	 : case -> state list
@@ -31,7 +31,7 @@ end
 
 type labyrinthe
 
-val create    : int -> int -> int -> labyrinthe
+val create : int -> int -> int -> labyrinthe
 val print_lab : labyrinthe -> unit
-val solve     : labyrinthe -> int * int -> int * int -> (int * int) list
-val get_case  : labyrinthe -> int -> int -> Case.case
+val solve : labyrinthe -> int * int -> int * int -> (int * int) list
+val get_case : labyrinthe -> int -> int -> Case.case

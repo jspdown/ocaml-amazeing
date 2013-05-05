@@ -207,19 +207,23 @@ let check tab =
   check_rec tab (Array.get tab 0) 0
 
 let link_one_square tab height width i a =
-  let create_one_link inc from on cond =
-    if cond (i + inc)
+  begin
+    if ((i + 1) mod width) != 0
     then
       begin
-	Case.set a from (Array.get tab (i + inc)) Case.Close;
-	Case.set (Array.get tab (i + inc)) on a Case.Close;
+	Case.set a 1 (Array.get tab (i + 1)) Case.Close;
+	Case.set (Array.get tab (i + 1)) 3 a Case.Close;
+      end
+    else
+      ();
+    if (i + width) < (height * width)
+    then
+      begin
+	Case.set a 2 (Array.get tab (i + width)) Case.Close;
+	Case.set (Array.get tab (i + width)) 0 a Case.Close;
       end
     else
       ()
-  in
-  begin
-    create_one_link 1 1 3 (fun a -> (((a) mod width) != 0));
-    create_one_link width 2 0 (fun a -> (a) < (height * width));
   end
 
 let get_color col_tab i idx width =
@@ -230,66 +234,14 @@ let get_color col_tab i idx width =
   | 3 -> Array.get col_tab (i - 1)
   | _ -> -1
 
-let get_idx_color col_tab i idx width =
-  match idx with
-  | 0 -> (i - width)
-  | 1 -> (i + 1)
-  | 2 -> (i + width)
-  | 3 -> (i - 1)
-  | _ -> -1
-
 let is_in_color col_tab i idx width =
   (get_color col_tab i idx width) = (Array.get col_tab i)
 
-let set_color_square lab col_tab i idx width =
+
+let set_color_square col_tab i idx width =
   let col = get_color col_tab i idx width in
   let to_col = Array.get col_tab i in
-  let rec set_rec_color prev_idx case_idx =
-    begin
-      if prev_idx >= 0 && case_idx >= 0 && case_idx < (Array.length col_tab) &&
-	(Array.get col_tab case_idx) = col && (Case.inter lab.(prev_idx) lab.(case_idx)) &&
-	  (Case.inter_state lab.(prev_idx) lab.(case_idx)) = Case.Open
-      then
-	begin
-	  Array.set col_tab case_idx to_col;
-	  set_rec_color case_idx (case_idx - width);
-	  set_rec_color case_idx (case_idx + width);
-	  set_rec_color case_idx (case_idx - 1);
-	  set_rec_color case_idx (case_idx + 1);
-	end
-      else
-	();
-    end
-  in
-  set_rec_color i (get_idx_color col_tab i idx width)
-
-let print_lab (tab,height,width) =
-  let print_one_char case str n =
-	try
-	  if (Case.get_idx_open case n) = n
-	  then
-	    print_string " "
-	  else
-	    print_string str
-	with x -> print_string str;
-  in
-  let print_one_case i case =
-    begin
-      print_one_char case "_" 2;
-      print_one_char case "|" 1;
-      if ((i+1) mod width) = 0 && (i+1) < (height * width)
-      then
-	print_string "\n|"
-      else
-	();
-    end
-  in
-  begin
-    print_string (String.make (width * 2) '_');
-    print_string "\n|";
-    Array.iteri print_one_case tab;
-    print_string "\n";
-  end
+  Array.iteri (fun i a -> if a = col then Array.set col_tab i to_col else ()) col_tab
 
 (* Module function *)
 
@@ -305,7 +257,7 @@ let create height width size =
       else
 	begin
 	  Case.open_door case idx;
-	  set_color_square tab col_tab i idx width;
+	  set_color_square col_tab i idx width;
 	end
     with x -> ()
   in
@@ -314,12 +266,10 @@ let create height width size =
   let rec create_lab tab =
     if (check col_tab) = true
     then
-	()
+      ()
     else
-      begin
-	let _ = Array.iteri (fun i a -> open_rand_door a i) tab in
-	create_lab tab
-      end
+      let _ = Array.iteri (fun i a -> open_rand_door a i) tab in
+      create_lab tab
   in
   begin
     Random.self_init ();
@@ -334,7 +284,6 @@ let get_case (lab,height,width) x y =
     Array.get lab ((x * width) + y)
   else
     raise (Invalid_argument "index out of range")
-
 let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) =
   let weight_map = (Array.make_matrix height width (-1)) in
   let set_weight case (x,y) weight =
@@ -358,7 +307,7 @@ let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) =
     let _ = solve (x,y) (x+1,y) (weight + 1) in
     let _ = solve (x,y) (x-1,y) (weight + 1) in
     let _ = solve (x,y) (x,y+1) (weight + 1) in
-    solve (x,y) (x,y-1) (weight + 1)
+    solve (x,y) (x,y-1) (weight + 1);
   and
       solve (x_prev,y_prev) (x,y) weight =
     try
@@ -393,3 +342,38 @@ let solve (lab,height,width) (x_start,y_start) (x_fin,y_fin) =
   let _ = weight_map.(x_fin).(y_fin) <- 0 in
   let _ = find_path (x_fin,y_fin) 0 in
   List.rev (resolve (x_start,y_start) [])
+
+let print_lab (tab,height,width) =
+  let print_one_case i case =
+    begin
+      begin
+	try
+	  if (Case.get_idx_open case 2) = 2
+	  then
+	    print_string " "
+	  else
+	    print_string "_"
+	with x -> print_string "_";
+      end;
+      begin
+	try
+	  if (Case.get_idx_open case 1) = 1
+	  then
+	    print_string " "
+	  else
+	    print_string "|";
+	with x -> print_string "|";
+      end;
+      if ((i+1) mod width) = 0 && (i+1) < (height * width)
+      then
+	print_string "\n|"
+      else
+	();
+    end
+  in
+  begin
+    print_string (String.make (width * 2) '_');
+    print_string "\n|";
+    Array.iteri print_one_case tab;
+    print_string "\n";
+  end
